@@ -1,0 +1,19 @@
+{
+  "name": "mm_threejs",
+  "version": "1.0.0",
+  "description": "MakerSCAD parametric 3D design engine library",
+  "main": "mm_three.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JC-Orozco/mm_threejs.git"
+  },
+  "author": "Juan Carlos Orozco Arena",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/JC-Orozco/mm_threejs/issues"
+  },
+  "homepage": "https://github.com/JC-Orozco/mm_threejs#readme"
+}
