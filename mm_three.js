@@ -344,6 +344,10 @@ var mm_extrude_path = function(polygon, path, divisions, closed){
   return mm_new_mesh(geometry);
 }
 
+// JCOA Implementation on extrude path using a normal extrude as starter, use each extrude unit as an index and then addapt each polygon to their corresponding path point. Use the previous and nest path points to calculate an average angle that will be used to place the polygon. Do not rotate the poligon on the other axis (define other axis)
+var mm_extrude_path2 = function(polygon, path, divisions){
+}
+
 var mm_merge_geometry  = function(object){
   var geometry = new THREE.Geometry();
   var objectGeometry = object.geometry;
