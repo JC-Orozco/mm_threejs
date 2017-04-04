@@ -346,6 +346,26 @@ var mm_extrude_path = function(polygon, path, divisions, closed){
 
 // JCOA Implementation on extrude path using a normal extrude as starter, use each extrude unit as an index and then addapt each polygon to their corresponding path point. Use the previous and nest path points to calculate an average angle that will be used to place the polygon. Do not rotate the poligon on the other axis (define other axis)
 var mm_extrude_path2 = function(polygon, path, divisions){
+  var polygonLen = polygon.lenght;
+  var pathLen = path.lenght;
+  
+  var shape = new THREE.Shape(polygon);
+  var extrudeSettings1 = {
+      bevelEnabled: false,
+      steps: segments,
+      amount: height
+  };
+
+  var geometry1 = new THREE.ExtrudeGeometry( shape, extrudeSettings1 );
+
+  // Check if path is closed
+  var closed = (path[0] == path[pathLen-1]);
+  
+  // Add angle helper functions.
+  // First rotate polygon in y and then in z.
+  // In not closed, first and last points use only the first and last lines. The rest of the points use the previous and next angles averaged. Use x to y angle and x to z angle helper functions.
+  
+  return mm_new_mesh(geometry1);  
 }
 
 var mm_merge_geometry  = function(object){
