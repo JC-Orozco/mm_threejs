@@ -345,9 +345,33 @@ var mm_extrude_path = function(polygon, path, divisions, closed){
 }
 
 // JCOA Implementation on extrude path using a normal extrude as starter, use each extrude unit as an index and then addapt each polygon to their corresponding path point. Use the previous and nest path points to calculate an average angle that will be used to place the polygon. Do not rotate the poligon on the other axis (define other axis)
-var mm_extrude_path2 = function(polygon, path, divisions){
-  var polygonLen = polygon.lenght;
-  var pathLen = path.lenght;
+var mm_extrude_path2 = function(polygon, path){
+  var polygonLen = polygon.length;
+  var pathLen = path.length;
+  
+  var pol3 = [];  
+  for(let v of polygon){
+    pol3.push(new THREE.Vector3(v.x, v.y, 0))
+  }
+  
+  var path3 = [];
+  var theta_phy_arr = []; // Theta and Phy angles on radians
+  for(let v of path){
+    path3.push(new THREE.Vector3(v.x, v.y, v.z || 0))
+    theta_phy_arr.push([0,0])
+  }
+  
+  var theta_phy = function(p1, p2){
+    let p = new THREE.Vector3();
+    p.subVectors(p2, p1);
+    // How to handle a 0,0 vector? Maybe get last known angle?
+    let xy = new THREE.Vector2(p.x,p.y)
+    let zr = new THREE.Vector2(p.z,xy.length())
+    return [zr.angle(), xy.angle()]
+  }
+  
+  var segments = pathLen-1;
+  var height = pathLen-1;
   
   var shape = new THREE.Shape(polygon);
   var extrudeSettings1 = {
@@ -358,14 +382,54 @@ var mm_extrude_path2 = function(polygon, path, divisions){
 
   var geometry1 = new THREE.ExtrudeGeometry( shape, extrudeSettings1 );
 
-  // Check if path is closed
-  var closed = (path[0] == path[pathLen-1]);
+    // Check if path is closed
+  var closed = path[0].equals(path[pathLen-1]);
+  
+  // First do 2 special cases. Start and end points depending if path is closed
+  if(closed){
+    let tp1 = theta_phy(path3[pathLen-1], path3[0])
+    let tp2 = theta_phy(path3[0], path3[1])
+    theta_phy_arr[0] = [(tp1[0]+tp2[0])/2.0, (tp1[1]+tp2[1])/2.0]
+    theta_phy_arr[pathLen-1] = theta_phy_arr[0]
+  }
+  else{
+    theta_phy_arr[0] = theta_phy(path3[0], path3[1])
+    theta_phy_arr[pathLen-1] = theta_phy(path3[pathLen-2], path3[pathLen-1])    
+  }
+  
+  for(let i=1; i<pathLen-1; i++){
+    let tp1 = theta_phy(path3[i-1], path3[i])
+    let tp2 = theta_phy(path3[i], path3[i+1])
+    theta_phy_arr[i] = [(tp1[0]+tp2[0])/2.0, (tp1[1]+tp2[1])/2.0]
+  }
+  
+  var i = 0
+  var j = 0
+  var yn = new THREE.Vector3(0,1,0)
+  var zn = new THREE.Vector3(0,0,1)
+  for(let p of path3){
+    // JCOA: Possible optimization, set rotation matrix (apply Euler to matrix) then transform each vector using matrix.
+    //let e1 = new THREE.Euler(0, theta_phy_arr[j][0], theta_phy_arr[j][1], "XYZ")
+    for(let v of pol3){
+      let vn = v.clone() // new THREE.Vector3()
+      // vn.addVectors(v,p)
+      //vn.applyEuler(e1)
+      vn.applyAxisAngle(yn, theta_phy_arr[j][0])
+      vn.applyAxisAngle(zn, theta_phy_arr[j][1])
+      vn.add(p)
+      geometry1.vertices[i] = vn
+      i += 1
+    }
+    j += 1
+  }
   
   // Add angle helper functions.
   // First rotate polygon in y and then in z.
   // In not closed, first and last points use only the first and last lines. The rest of the points use the previous and next angles averaged. Use x to y angle and x to z angle helper functions.
   
-  return mm_new_mesh(geometry1);  
+  geometry1.computeFaceNormals()
+  
+  return mm_new_mesh(geometry1)  
 }
 
 var mm_merge_geometry  = function(object){
