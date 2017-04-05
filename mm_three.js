@@ -427,6 +427,8 @@ var mm_extrude_path2 = function(polygon, path){
   // First rotate polygon in y and then in z.
   // In not closed, first and last points use only the first and last lines. The rest of the points use the previous and next angles averaged. Use x to y angle and x to z angle helper functions.
   
+  // This next command is not solving the face orientation problems, we may be missing faces too
+  // We may need to generate our own faces for this to work
   geometry1.computeFaceNormals()
   
   return mm_new_mesh(geometry1)  
