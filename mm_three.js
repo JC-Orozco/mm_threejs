@@ -1041,7 +1041,7 @@ var mm_container,
       mm_scene = new THREE.Scene();
       mm_camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.001, 2000);
       mm_camera.position.set(0, 15, 0);
-      mm_camera.up = new THREE.Vector3( 0, 0, 1 ); // Turn camera so z axis points up
+      //mm_camera.up = new THREE.Vector3( 0, 0, 1 ); // Turn camera so z axis points up
       mm_camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
       
       //mm_scene.add(mm_camera);
