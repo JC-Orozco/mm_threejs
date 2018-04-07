@@ -1030,3 +1030,93 @@ var mm_load_library = function(name){
 //   some code...
 // }
 // mm_load_library('code.js', myCallback, document.body);
+
+// VR functions:
+var mm_container,
+    mm_effect
+
+    function initVR() {
+      var mm_element
+      
+      mm_scene = new THREE.Scene();
+      mm_camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.001, 2000);
+      mm_camera.position.set(0, 15, 0);
+      mm_camera.up = new THREE.Vector3( 0, 0, 1 ); // Turn camera so z axis points up
+      mm_camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
+      
+      //mm_scene.add(mm_camera);
+      mm_renderer = new THREE.WebGLRenderer();
+      mm_element = mm_renderer.domElement;
+      mm_container = document.getElementById('three');
+      mm_container.appendChild(mm_element);
+      mm_effect = new THREE.StereoEffect(mm_renderer);
+      // Our initial control fallback with mouse/touch events in case DeviceOrientation is not enabled
+      mm_controls = new THREE.OrbitControls(mm_camera, mm_element);
+      mm_controls.target.set(
+        mm_camera.position.x + 0.15,
+        mm_camera.position.y,
+        mm_camera.position.z
+      );
+      mm_controls.enablePan = false;
+      mm_controls.enableZoom = false;
+      // Our preferred controls via DeviceOrientation
+      function setOrientationControls(e) {
+        if (!e.alpha) {
+          return;
+        }
+        mm_controls = new THREE.DeviceOrientationControls(mm_camera, true);
+        //mm_controls.updateAlphaOffsetAngle(1.5708/4) // 90 Z
+        mm_controls.connect();
+        mm_controls.update();
+        mm_element.addEventListener('click', fullscreen, false);
+        window.removeEventListener('deviceorientation', setOrientationControls, true);
+      }
+      window.addEventListener('deviceorientation', setOrientationControls, true);
+      // Lighting
+      var light = new THREE.PointLight(0x999999, 2, 100);
+      light.position.set(50, 50, 50);
+      mm_scene.add(light);
+
+      var lightScene = new THREE.PointLight(0x999999, 2, 100);
+      lightScene.position.set(0, 5, 0);
+      mm_scene.add(lightScene);
+      mm_clock = new THREE.Clock();
+
+      mm_material = new THREE.MeshPhongMaterial( { color: 0xFFFFFF, wireframe:  mm_three_toolbar.wireframe, wireframeLinewidth: 1 } );
+
+      animateVR();
+    }
+
+    function animateVR() {
+      var elapsedSeconds = mm_clock.getElapsedTime()
+      requestAnimationFrame(animateVR);
+      updateVR(mm_clock.getDelta());
+      renderVR(mm_clock.getDelta());
+    }
+    function resizeVR() {
+      var width = mm_container.offsetWidth;
+      var height = mm_container.offsetHeight;
+      mm_camera.aspect = width / height;
+      mm_camera.updateProjectionMatrix();
+      mm_renderer.setSize(width, height);
+      mm_effect.setSize(width, height);
+    }
+    function updateVR(dt) {
+      resizeVR();
+      mm_camera.updateProjectionMatrix();
+      mm_controls.update(dt);
+    }
+    function renderVR(dt) {
+      mm_effect.render(mm_scene, mm_camera);
+    }
+    function fullscreen() {
+      if (mm_container.requestFullscreen) {
+        mm_container.requestFullscreen();
+      } else if (mm_container.msRequestFullscreen) {
+        mm_container.msRequestFullscreen();
+      } else if (mm_container.mozRequestFullScreen) {
+        mm_container.mozRequestFullScreen();
+      } else if (mm_container.webkitRequestFullscreen) {
+        mm_container.webkitRequestFullscreen();
+      }
+    }
