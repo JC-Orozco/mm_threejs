@@ -19,7 +19,7 @@ THREE.DeviceOrientationControls = function ( object ) {
 	this.screenOrientation = 0;
 
 	this.alphaOffset = 0; // radians
-	this.betaOffset = 0; // radians
+	this.betaOffset = -1.0472; // radians
 	this.gammaOffset = 0; // radians
 
 	var onDeviceOrientationChangeEvent = function ( event ) {
